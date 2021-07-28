@@ -6,7 +6,7 @@ import Posts from "../Posts/Posts";
 import Form from "../Forms/Form";
 import useStyles from "../../styles";
 import {useDispatch} from "react-redux";
-import {getPosts} from "../../actions/post";
+import {getPosts, getPostsBySearch} from "../../actions/post";
 import Pagination from "../Pagination/pagination";
 
 function useQuery() {
@@ -30,8 +30,9 @@ const Home = () => {
     },[currentId, dispatch]);
 
     const searchPost = () => {
-        if (search.trim()) {
-           //fetch post
+        if (search.trim() || tags) {
+           dispatch(getPostsBySearch({search,tags: tags.join(',')}))
+            history.push(`/posts/search?searchQuery=${search || 'none'}&tags=${tags.join(',')}`)
         } else {
             history.push("/")
         }
