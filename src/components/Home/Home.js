@@ -80,9 +80,13 @@ const Home = () => {
                         <br/>
                         <Form currentId={currentId} setCurrentId={setCurrentId}/>
                         <br/>
-                        <Paper className={classes.pagination} elevation={6}>
-                            <Pagination page={page}/>
-                        </Paper>
+                        {
+                            (!searchQuery && !tags.length) && (
+                                <Paper className={classes.pagination} style={{padding: '10px'}} elevation={6}>
+                                    <Pagination page={page}/>
+                                </Paper>
+                            )
+                        }
                     </Grid>
                 </Grid>
             </Container>
