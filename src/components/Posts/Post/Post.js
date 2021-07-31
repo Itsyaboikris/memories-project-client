@@ -1,6 +1,6 @@
-import React from "react";
-import useStyles from './style';
-import {Button, ButtonBase, Card, CardActions, CardContent, CardMedia, Typography} from "@material-ui/core";
+import React, {useState} from "react";
+import useStyles from './styles';
+import {Button, Card, CardActions, CardContent, CardMedia, Typography} from "@material-ui/core";
 import ThumbUpAltIcon from '@material-ui/icons/ThumbUpAlt';
 import DeleteIcon from '@material-ui/icons/Delete';
 import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
@@ -16,15 +16,30 @@ const Post = ({post, setCurrentId}) => {
     const user = JSON.parse(localStorage.getItem('profile'));
     const history = useHistory();
 
+    const [likes, setLikes] = useState(post?.likes);
+    const userId = user?.result.googleId || user?.result?._id;
+    const hasLikedPost = likes.find((like) => like === (userId));
+
+
+    const handleLike = () => {
+        dispatch(likePost(post._id));
+
+        if (hasLikedPost) {
+            setLikes(likes.filter((id) => id !== (userId)))
+        } else {
+            setLikes([...likes, userId])
+        }
+    };
+
     const Likes = () => {
-        if (post.likes.length > 0) {
-            return post.likes.find((like) => like === (user?.result?.googleId || user?.result?._id))
+        if (likes.length > 0) {
+            return likes.find((like) => like === (userId))
                 ? (
                     <><ThumbUpAltIcon
-                        fontSize="small"/>&nbsp;{post.likes.length > 2 ? `You and ${post.likes.length - 1} others` : `${post.likes.length} like${post.likes.length > 1 ? 's' : ""}`} </>
+                        fontSize="small"/>&nbsp;{likes.length > 2 ? `You and ${likes.length - 1} others` : `${likes.length} like${likes.length > 1 ? 's' : ""}`} </>
                 ) : (
                     <><ThumbUpAltOutlined
-                        fontSize="small"/>&nbsp;{post.likes.length} {post.likes.length === 1 ? 'Like' : 'Likes'}</>
+                        fontSize="small"/>&nbsp;{likes.length} {likes.length === 1 ? 'Like' : 'Likes'}</>
                 )
         }
 
@@ -34,7 +49,7 @@ const Post = ({post, setCurrentId}) => {
     const openPost = () => history.push(`/posts/${post._id}`);
 
     return (
-        <Card className={classes.card} raised elevation={6} onClick={openPost}>
+        <Card className={classes.card} raised elevation={6}>
             <CardMedia className={classes.media} image={post.selectedFile} title={post.title}/>
             <div className={classes.overlay}>
                 <Typography variant="h6">{post.name}</Typography>
@@ -42,11 +57,15 @@ const Post = ({post, setCurrentId}) => {
             </div>
             {(user?.result?.googleId === post?.creator || user?.result?._id === post?.creator) && (
                 <div className={classes.overlay2}>
-                    <Button style={{color: 'white'}} size="small" onClick={() => setCurrentId(post._id)}>
+                    <Button style={{color: 'white'}} size="small" onClick={(e) => {
+                        e.stopPropagation();
+                        setCurrentId(post._id);
+                    }}>
                         <MoreHorizIcon fontSize="default"/>
                     </Button>
                 </div>
             )}
+            <div onClick={openPost}>
                 <div className={classes.details}>
                     <Typography variant="body2" color="textSecondary">
                         {post.tags.map((tag) => `#${tag} `)}
@@ -60,9 +79,10 @@ const Post = ({post, setCurrentId}) => {
                         {post.message}
                     </Typography>
                 </CardContent>
+            </div>
             <CardActions className={classes.cardActions}>
                 <Button size="small" color="primary" disabled={!user?.result}
-                        onClick={() => dispatch(likePost(post._id))}>
+                        onClick={handleLike}>
                     <Likes/>
                 </Button>
                 {(user?.result?.googleId === post?.creator || user?.result?._id === post?.creator) && (

@@ -1,4 +1,5 @@
 import {
+    COMMENT,
     CREATE,
     DELETE,
     END_LOADING,
@@ -15,6 +16,12 @@ export default (state = {isLoading: true, posts: []}, action) => {
             return {...state, isLoading: true};
         case END_LOADING:
             return {...state, isLoading: false};
+        case COMMENT: return {...state, posts: state.posts.map((post) => {
+                if (post._id === action.payload._id){
+                    return action.payload;
+                }
+                return post;
+            })};
         case FETCH_ALL:
             return {
                 ...state,
